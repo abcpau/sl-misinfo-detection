@@ -1,12 +1,24 @@
 import streamlit as st
-
+from backend import format_premise_hypothesis, generate_inference, parse_llama_explanation
 
 #------------------
+
+IP_ADDRESS = '192.168.50.32'
+PORT = 11434
+URL = f"http://{IP_ADDRESS}:{PORT}/api/chat"
+HEADERS = {"Content-Type": "application/json"}
+
+MODEL = "llama3.1:8b"
+# MODEL = "deepseek-r1:8b" # Not yet supported
+
+#------------------
+
 def predict(h, p):
-    prediction = 'fact'
-    # prediction = 'false'
-    # st.write(h, p)
-    return prediction
+    formatted_input = format_premise_hypothesis(p, h)
+    inference = generate_inference(url=URL, headers=HEADERS, model=MODEL, content=formatted_input)
+    prediction, explanation = parse_llama_explanation(inference)
+    return prediction, explanation
+
 #------------------
 
 
@@ -34,7 +46,8 @@ col1,col2 = st.columns([1,2])
 #------------------
 
 def display_pred():
-    st.session_state.pred = predict(st.session_state.claim, st.session_state.premise)
+    pred, expl = predict(st.session_state.claim, st.session_state.premise)
+    st.session_state.pred = pred
 
 #------------------
 

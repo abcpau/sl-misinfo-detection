@@ -31,6 +31,9 @@ if "premise" not in st.session_state:
 if "pred" not in st.session_state:
     st.session_state.pred = ""
 
+if "expl" not in st.session_state:
+    st.session_state.expl = ""
+
 
 #------------------
 
@@ -42,12 +45,15 @@ premise_placeholder = st.empty()
 
 col1,col2 = st.columns([1,2])
 
+expl_placeholder = st.empty()
+
 
 #------------------
 
 def display_pred():
     pred, expl = predict(st.session_state.claim, st.session_state.premise)
     st.session_state.pred = pred
+    st.session_state.expl = expl
 
 #------------------
 
@@ -72,3 +78,4 @@ if submit:
     premise_placeholder.markdown(f"Premise: {st.session_state.premise}")
     col1.markdown("<h2 style='padding-top: 0px;'>Verdict: </h2>", unsafe_allow_html=True)
     col2.markdown(f"<h2 style='padding-top: 0px; color:red'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
+    expl_placeholder.markdown(f"Basis: {st.session_state.expl}")

@@ -3,7 +3,7 @@ from backend import format_premise_hypothesis, generate_inference, parse_llama_e
 
 #------------------
 
-IP_ADDRESS = '192.168.50.32'
+IP_ADDRESS = '10.147.36.147'
 PORT = 11434
 URL = f"http://{IP_ADDRESS}:{PORT}/api/chat"
 HEADERS = {"Content-Type": "application/json"}
@@ -77,5 +77,9 @@ if submit:
     claim_placeholder.markdown(f"Claim: {st.session_state.claim}")
     premise_placeholder.markdown(f"Premise: {st.session_state.premise}")
     col1.markdown("<h2 style='padding-top: 0px;'>Verdict: </h2>", unsafe_allow_html=True)
-    col2.markdown(f"<h2 style='padding-top: 0px; color:red'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
+    if st.session_state.pred == "fact":
+        col2.markdown(f"<h2 style='padding-top: 0px; color:green'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
+    else:
+        col2.markdown(f"<h2 style='padding-top: 0px; color:red'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
+    
     expl_placeholder.markdown(f"Basis: {st.session_state.expl}")

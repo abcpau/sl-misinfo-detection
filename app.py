@@ -12,9 +12,11 @@ def predict(h, p):
 
 #------------------
 
-
 if "claim" not in st.session_state:
     st.session_state.claim = ""
+
+if "premise_finder" not in st.session_state:
+    st.session_state.premise_finder = ""
 
 if "premise" not in st.session_state:
     st.session_state.premise = ""
@@ -48,6 +50,15 @@ def display_pred():
 
 #------------------
 
+premise_finder = st.radio(
+        "Where will we get the premise?",
+        ["I have my own premise",
+         "Check your dataset",
+         "Refer to the Internet"],
+         key="premise_finder"
+    )
+
+
 with st.form("my_form"):
 
     claim = st.text_area(
@@ -56,11 +67,15 @@ with st.form("my_form"):
         placeholder="Enter the statement you want to verify here...",
     )
 
-    premise = st.text_area(
-        "Input Premise",
-        key="premise",
-        placeholder="Enter some facts to help us verify your claim here...",
-    )
+
+    if premise_finder == "I have my own premise":
+        premise = st.text_area(
+            "Input Premise",
+            key="premise",
+            placeholder="Enter some facts to help us verify your claim here...",
+        )
+
+
 
     submit = st.form_submit_button('Verify', on_click=display_pred)
 

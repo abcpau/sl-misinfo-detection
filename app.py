@@ -62,15 +62,27 @@ def display_pred():
         pred, expl = predict(st.session_state.claim, st.session_state.premise)
         st.session_state.pred = pred
         st.session_state.expl = expl
+
     elif pf == "pomi":
-        # call find_premise_via_sentence_similarity
-        return
+        # prem = find_premise_via_sentence_similarity
+        prem = st.session_state.premise     #placeholder, to remove
+        pred, expl = predict(st.session_state.claim, prem)
+        st.session_state.pred = pred
+        st.session_state.expl = expl
+    
     elif pf == "webrag":
-        # call find_premise_via_webrag
-        return
+        # prem = find_premise_via_webrag
+        prem = st.session_state.premise     #placeholder, to remove
+        pred, expl = predict(st.session_state.claim, prem)
+        st.session_state.pred = pred
+        st.session_state.expl = expl
+
     else:
-        # call find_premise_via_webcrawl
-        return
+        # prem = find_premise_via_webcrawl
+        prem = st.session_state.premise     #placeholder, to remove
+        pred, expl = predict(st.session_state.claim, prem)
+        st.session_state.pred = pred
+        st.session_state.expl = expl
 
 #------------------
 

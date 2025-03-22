@@ -43,10 +43,34 @@ expl_placeholder = st.empty()
 
 #------------------
 
+def shorten_premise_finder():
+    pf = ""
+    match st.session_state.premise_finder:
+        case "I have my own premise":
+            pf = "own"
+        case "Check your dataset":
+            pf = "pomi"
+        case "Refer to the Internet using WebRAG":
+            pf = "webrag"
+        case _:
+            pf = "webcrawl"
+    return pf
+
 def display_pred():
-    pred, expl = predict(st.session_state.claim, st.session_state.premise)
-    st.session_state.pred = pred
-    st.session_state.expl = expl
+    pf = shorten_premise_finder()
+    if pf == "own":
+        pred, expl = predict(st.session_state.claim, st.session_state.premise)
+        st.session_state.pred = pred
+        st.session_state.expl = expl
+    elif pf == "pomi":
+        # call find_premise_via_sentence_similarity
+        return
+    elif pf == "webrag":
+        # call find_premise_via_webrag
+        return
+    else:
+        # call find_premise_via_webcrawl
+        return
 
 #------------------
 
@@ -54,7 +78,8 @@ premise_finder = st.radio(
         "Where will we get the premise?",
         ["I have my own premise",
          "Check your dataset",
-         "Refer to the Internet"],
+         "Refer to the Internet using WebRAG",
+         "Refer to the Internet using WebCrawl"],
          key="premise_finder"
     )
 
@@ -78,6 +103,7 @@ with st.form("my_form"):
 
 
     submit = st.form_submit_button('Verify', on_click=display_pred)
+
 
 if submit:
     claim_placeholder.markdown(f"Claim: {st.session_state.claim}")

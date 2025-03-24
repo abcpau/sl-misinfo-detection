@@ -1,0 +1,15 @@
+.websearch-result {
+    background-color: #f4f4f4;
+    border-left: 5px solid #256dc4;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.text-box {
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+}

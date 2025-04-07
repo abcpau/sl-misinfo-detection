@@ -1,5 +1,7 @@
+from duckduckgo_search import DDGS
 import requests
 import json
+import re
 
 def format_premise_hypothesis(premise, hypothesis):
   return f"<Premise>{premise}</Premise><Hypothesis>{hypothesis}</Hypothesis>"
@@ -40,3 +42,35 @@ def parse_llama_explanation(text):
   except Exception as e:
     print(f"Error: {e}")
     return 'error', text
+
+def parse_domain(link):
+  think_pattern = r"https://(?:www\.)?([^/]+)"
+  re_match = re.search(think_pattern, link, re.DOTALL)
+  web_link = re_match.group(1).strip()
+  return web_link
+
+def web_search_logo(query):
+  with DDGS() as ddgs:
+    results = ddgs.images(f"{query} logo", max_results=1)  # Get the first image
+
+    if results:
+      # Returns logo URL
+      return results[0]['image']
+
+    raise ValueError("No image found.")
+
+def web_search_text(query, max_results=3, add_logo_url=True):
+  with DDGS() as ddgs:
+    results = ddgs.text(query, max_results=max_results)  # Get the top 5 results
+
+    if add_logo_url:
+      for result in results: result['logo_url'] = web_search_logo(parse_domain(result['href']))
+
+    # Returns an array of dictionaries to access title, href, body, *(optional) logo_url
+    return results
+
+def find_premise_via_webrag(claim, url_filters):
+  search_results = web_search_text(claim, max_results=1)
+  result = search_results[0]
+
+  return result['href'], search_results

@@ -1,6 +1,6 @@
 import streamlit as st
 import config
-from backend import format_premise_hypothesis, generate_inference, parse_llama_explanation
+from backend import format_premise_hypothesis, generate_inference, parse_llama_explanation, find_premise_via_webrag
 def load_css(file_name):
     with open(file_name) as f:
         css = f.read()
@@ -13,17 +13,6 @@ def find_premise_via_sentence_similarity():
     prem = top_results[0][0]
     prem_similarity = top_results[0][1]
     return top_results, prem, prem_similarity
-
-def find_premise_via_webrag():
-    websearch = [{"title": "Title 1",
-                 "href": "https://verafiles.org/",
-                 "body": "Body 1",
-                 "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"},
-                 {"title": "Title 2",
-                 "href": "https://verafiles.org/",
-                 "body": "Body 2",
-                 "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"}]
-    return websearch, "https://verafiles.org/"
 
 def find_premise_via_webcrawl():
     websearch = [{"title": "Title 1",
@@ -104,7 +93,7 @@ def display_pred():
 
     elif pf == 2:
         # websearch, prem_link = find_premise_via_webrag(st.session_state.claim, url=URL, headers=HEADERS, model=MODEL)
-        websearch, prem_link = find_premise_via_webrag()            #placeholder, to remove
+        prem_link, websearch = find_premise_via_webrag()            #placeholder, to remove
         st.session_state.websearch = websearch
         st.session_state.premise = prem_link
 

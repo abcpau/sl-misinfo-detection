@@ -3,10 +3,7 @@ import requests
 import json
 import re
 
-def format_premise_hypothesis(premise, hypothesis):
-  return f"<Premise>{premise}</Premise><Hypothesis>{hypothesis}</Hypothesis>"
-
-def generate_inference(url, headers, model, content, retry_count=0, retry_limit=2, timeout=120):
+def generate_response(url, headers, model, params, retry_count=0, retry_limit=2, timeout=120):
   try:
     response = requests.post(
       timeout = timeout,
@@ -17,23 +14,44 @@ def generate_inference(url, headers, model, content, retry_count=0, retry_limit=
         "temperature": 0,
         "options": {"temperature": 0},
         "stream": False,
-        "messages": [
-          {
-            "role": "system",
-            "content": "You are an investigator who is an expert at inference. You check if the given <Premise> ENTAILS, CONTRADICTS, or IS NEUTRAL TO the given <Hypothesis>. If the <Premise> ENTAILS the <Hypothesis>, say 'fact' followed by an explanation why. If the <Premise> CONTRADICTS or IS NEUTRAL TO the <Hypothesis>, say 'false' followed by an explanation why. Use the format '{fact/false} - {explanation}'.",
-          },
-          {
-            "role": "user",
-            "content": content
-          }
-        ]
-    }))
-    return response.json()["message"]["content"]
+        **params
+        })
+    )
+    return response.json()
 
   except requests.Timeout:
     print(f"{retry_count} | Timed out")
-    if retry_count <= retry_limit: return generate_inference(url, headers, model, content, retry_count + 1)
-    
+    if retry_count <= retry_limit: return generate_response(url, headers, model, params, retry_count + 1)
+
+def WEB_RAG_PARAMS(claim, link):
+  return {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an investigator who is an expert at inference. Read the whole article source with the link given and check if the given source ENTAILS, CONTRADICTS, or IS NEUTRAL TO the given <Hypothesis>. If the article ENTAILS the <Hypothesis>, say 'fact' followed by an explanation why. If the <Premise> CONTRADICTS or IS NEUTRAL TO the <Hypothesis>, say 'false' followed by an explanation why. Use the format '{fact/false} - {explanation}'.",
+      },
+      {
+        "role": "user",
+        "content": f'''#{link}
+        <Hypothesis>{claim}</Hypothesis>'''
+      }
+    ]
+  }
+
+def INFER_PARAMS(claim, premise):
+  return {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an investigator who is an expert at inference. You check if the given <Premise> ENTAILS, CONTRADICTS, or IS NEUTRAL TO the given <Hypothesis>. If the <Premise> ENTAILS the <Hypothesis>, say 'fact' followed by an explanation why. If the <Premise> CONTRADICTS or IS NEUTRAL TO the <Hypothesis>, say 'false' followed by an explanation why. Use the format '{fact/false} - {explanation}'.",
+      },
+      {
+        "role": "user",
+        "content": f"<Premise>{premise}</Premise><Hypothesis>{claim}</Hypothesis>"
+      }
+    ]
+  }
+
 def parse_llama_explanation(text):
   try:
     label, explanation = text.split(' - ')
@@ -74,7 +92,7 @@ def web_search_text(query, url_whitelist, max_results, add_logo_url=True):
     # Returns an array of dictionaries to access title, href, body, *(optional) logo_url
     return results
 
-def find_premise_via_webrag(claim, url_filters=[], max_results=10):
+def find_premise_via_webrag(claim, url_filters=[], max_results=5):
   search_results = web_search_text(claim, url_filters, max_results, add_logo_url=True)
   result = search_results[0]
   return result['href'], search_results

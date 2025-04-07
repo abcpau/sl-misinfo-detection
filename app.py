@@ -1,6 +1,8 @@
 import streamlit as st
 import config
-from backend import format_premise_hypothesis, generate_inference, parse_llama_explanation, find_premise_via_webrag
+from backend import parse_llama_explanation, find_premise_via_webrag
+from backend import WEB_RAG_PARAMS, INFER_PARAMS, generate_response
+
 def load_css(file_name):
     with open(file_name) as f:
         css = f.read()
@@ -31,7 +33,8 @@ def predict(h, p):
     return "False", "This is the EXPLANATION"
     #--------------
     formatted_input = format_premise_hypothesis(p, h)
-    inference = generate_inference(url=URL, headers=HEADERS, model=MODEL, content=formatted_input)
+    inference = generate_response(url=URL, headers=HEADERS, model=MODEL, content=WEB_RAG_PARAMS(h, p))
+    inference = generate_response(url=URL, headers=HEADERS, model=MODEL, params=INFER_PARAMS(h, p))
     prediction, explanation = parse_llama_explanation(inference)
     return prediction, explanation
 

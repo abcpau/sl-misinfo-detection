@@ -59,18 +59,22 @@ def web_search_logo(query):
 
     raise ValueError("No image found.")
 
-def web_search_text(query, max_results=3, add_logo_url=True):
+def web_search_text(query, url_whitelist, max_results, add_logo_url=True):
   with DDGS() as ddgs:
-    results = ddgs.text(query, max_results=max_results)  # Get the top 5 results
+    results = ddgs.text(query, max_results=max_results)
+
+    # Filter results based on the whitelist
+    if url_whitelist:
+      results = [result for result in results if any(whitelisted_url in result['href'] for whitelisted_url in url_whitelist)]
 
     if add_logo_url:
-      for result in results: result['logo_url'] = web_search_logo(parse_domain(result['href']))
+      for result in results: 
+        result['logo_url'] = web_search_logo(parse_domain(result['href']))
 
     # Returns an array of dictionaries to access title, href, body, *(optional) logo_url
     return results
 
-def find_premise_via_webrag(claim, url_filters):
-  search_results = web_search_text(claim, max_results=1)
+def find_premise_via_webrag(claim, url_filters=[], max_results=10):
+  search_results = web_search_text(claim, url_filters, max_results, add_logo_url=True)
   result = search_results[0]
-
   return result['href'], search_results

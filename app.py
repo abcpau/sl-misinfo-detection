@@ -92,8 +92,8 @@ def display_pred():
     
 
     elif pf == 2:
-        # websearch, prem_link = find_premise_via_webrag(st.session_state.claim, url=URL, headers=HEADERS, model=MODEL)
-        prem_link, websearch = find_premise_via_webrag()            #placeholder, to remove
+        prem_link, websearch = find_premise_via_webrag(st.session_state.claim, url_filters=[])
+        # prem_link, websearch = find_premise_via_webrag(claim)            #placeholder, to remove
         st.session_state.websearch = websearch
         st.session_state.premise = prem_link
 

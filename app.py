@@ -67,11 +67,18 @@ if "expl" not in st.session_state:
 
 
 st.title("FAKE NEWS DETECTOR!")
-
 input_placeholder = st.empty()
+
 claim_placeholder = st.empty()
+
+st.markdown('<div class="center-box">', unsafe_allow_html=True)
 pred_placeholder = st.empty()
+st.markdown('</div>', unsafe_allow_html=True)
+
 expl_placeholder = st.empty()
+
+division_placeholder = st.empty()
+
 top_prems_placeholder = st.empty()
 websearch_placeholder = st.empty()
 premise_placeholder = st.empty()
@@ -108,6 +115,22 @@ if submit:
 
     claim_placeholder.markdown(f"<div class='text-box'>Claim: {st.session_state.claim}</div>", unsafe_allow_html=True)
 
+    verdict_color = "green" if st.session_state.pred == "fact" else "red"
+    pred_placeholder.markdown(
+        f"""
+        <div class="verdict-box-false">
+        <h2 style='padding: 5px;'>Verdict: &nbsp;
+            <span style='color:{verdict_color};'><em>{st.session_state.pred.capitalize()}</em></span>
+        </h2>
+        </div
+        """,
+        unsafe_allow_html=True
+        )
+
+    expl_placeholder.markdown(f"Basis: {st.session_state.expl}")
+
+    division_placeholder.markdown('---')
+
     with websearch_placeholder.container():
         st.markdown(f"<p style='margin: 0px;'>Websearch results:</p>", unsafe_allow_html=True)
         for result in st.session_state.websearch:
@@ -123,6 +146,7 @@ if submit:
                 """,
                 unsafe_allow_html=True
             )
+            
     premise_placeholder.markdown(f"Premise taken from: {st.session_state.premise}")
 
     # col1.markdown("<h2 style='padding-top: 5px;'>Verdict: </h2>", unsafe_allow_html=True)
@@ -130,18 +154,3 @@ if submit:
     #     col2.markdown(f"<h2 style='padding-top: 5px; color:green'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
     # else:
     #     col2.markdown(f"<h2 style='padding-top: 5px; color:red'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
-    
-    verdict_color = "green" if st.session_state.pred == "fact" else "red"
-
-    pred_placeholder.markdown(
-        f"""
-        <div class="text-box">
-        <h2 style='padding: 5px;'>Verdict: &nbsp;
-            <span style='color:{verdict_color};'><em>{st.session_state.pred.capitalize()}</em></span>
-        </h2>
-        </div
-        """,
-        unsafe_allow_html=True
-        )
-
-    expl_placeholder.markdown(f"Basis: {st.session_state.expl}")

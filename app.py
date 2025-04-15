@@ -70,12 +70,11 @@ st.title("FAKE NEWS DETECTOR!")
 
 input_placeholder = st.empty()
 claim_placeholder = st.empty()
+pred_placeholder = st.empty()
+expl_placeholder = st.empty()
 top_prems_placeholder = st.empty()
 websearch_placeholder = st.empty()
 premise_placeholder = st.empty()
-pred_placeholder = st.empty()
-expl_placeholder = st.empty()
-
 
 #------------------
 
@@ -105,6 +104,8 @@ with input_placeholder.container():
 
 
 if submit:
+    input_placeholder.empty()
+
     claim_placeholder.markdown(f"<div class='text-box'>Claim: {st.session_state.claim}</div>", unsafe_allow_html=True)
 
     with websearch_placeholder.container():

@@ -68,6 +68,7 @@ if "expl" not in st.session_state:
 
 st.title("FAKE NEWS DETECTOR!")
 
+input_placeholder = st.empty()
 claim_placeholder = st.empty()
 top_prems_placeholder = st.empty()
 websearch_placeholder = st.empty()
@@ -91,15 +92,16 @@ def display_pred():
 
 #------------------
 
-with st.form("my_form"):
+with input_placeholder.container():
+    with st.form("my_form"):
 
-    claim = st.text_area(
-        "Input Claim",
-        key="claim",
-        placeholder="Enter the statement you want to verify here...",
-    )
+        claim = st.text_area(
+            "Input Claim",
+            key="claim",
+            placeholder="Enter the statement you want to verify here...",
+        )
 
-    submit = st.form_submit_button('Verify', on_click=display_pred)
+        submit = st.form_submit_button('Verify', on_click=display_pred)
 
 
 if submit:

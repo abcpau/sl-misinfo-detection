@@ -3,6 +3,8 @@ import config
 from backend import parse_llama_explanation#, find_premise_via_webrag
 from backend import WEB_RAG_PARAMS, INFER_PARAMS, generate_response
 
+# st.set_page_config(layout="wide")
+
 def load_css(file_name):
     with open(file_name) as f:
         css = f.read()
@@ -50,6 +52,9 @@ def predict(h, p):
 
 #------------------
 
+if "submitted" not in st.session_state:
+    st.session_state.submitted = False
+
 if "claim" not in st.session_state:
     st.session_state.claim = ""
 
@@ -65,8 +70,42 @@ if "expl" not in st.session_state:
 
 #------------------
 
+def display_pred():
+    st.session_state.submitted = True
+    # prem_link, websearch = find_premise_via_webrag(st.session_state.claim, url_filters=[])
+    websearch, prem_link = find_premise_via_webrag()            #placeholder, to remove
+    st.session_state.websearch = websearch
+    st.session_state.premise = prem_link
 
-st.title("FAKE NEWS DETECTOR!")
+    pred, expl = predict(st.session_state.claim, prem_link)
+    st.session_state.pred = pred
+    st.session_state.expl = expl
+
+
+def reset_state():
+    st.session_state.submitted = False
+    st.rerun()
+
+#------------------
+
+logo_url = 'https://www.shutterstock.com/image-vector/cow-logo-farm-product-design-600nw-2506761705.jpg'
+
+header = st.container()
+with header:
+    st.markdown(
+                f"""
+                <div class="header">
+                    <div class="title-row">
+                        <img src="{logo_url}" width="100px">
+                        <h1 class="title" style="word-break: keep-all">POMI</h1>
+                    </div>
+                    <p class="subtitle"> A Filipino Fake News Detector </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
 input_placeholder = st.empty()
 
 claim_placeholder = st.empty()
@@ -83,34 +122,22 @@ top_prems_placeholder = st.empty()
 websearch_placeholder = st.empty()
 premise_placeholder = st.empty()
 
-#------------------
-
-def display_pred():
-    
-    # prem_link, websearch = find_premise_via_webrag(st.session_state.claim, url_filters=[])
-    websearch, prem_link = find_premise_via_webrag()            #placeholder, to remove
-    st.session_state.websearch = websearch
-    st.session_state.premise = prem_link
-
-    pred, expl = predict(st.session_state.claim, prem_link)
-    st.session_state.pred = pred
-    st.session_state.expl = expl
-
-#------------------
-
-with input_placeholder.container():
-    with st.form("my_form"):
-
-        claim = st.text_area(
-            "Input Claim",
-            key="claim",
-            placeholder="Enter the statement you want to verify here...",
-        )
-
-        submit = st.form_submit_button('Verify', on_click=display_pred)
 
 
-if submit:
+if not st.session_state.submitted:
+    with input_placeholder.container():
+        with st.form("my_form"):
+
+            claim = st.text_area(
+                "Input Claim",
+                key="claim",
+                placeholder="Enter the statement you want to verify here...",
+            )
+
+            submit = st.form_submit_button('Verify', on_click=display_pred)
+
+
+else:
     input_placeholder.empty()
 
     claim_placeholder.markdown(f"<div class='text-box'>Claim: {st.session_state.claim}</div>", unsafe_allow_html=True)
@@ -127,7 +154,7 @@ if submit:
         unsafe_allow_html=True
         )
 
-    expl_placeholder.markdown(f"Basis: {st.session_state.expl}")
+    expl_placeholder.markdown(f"Explanation: {st.session_state.expl}")
 
     division_placeholder.markdown('---')
 
@@ -148,6 +175,14 @@ if submit:
             )
             
     premise_placeholder.markdown(f"Premise taken from: {st.session_state.premise}")
+
+    st.markdown('---')
+
+    
+    refresh = st.button('Try another claim!')
+    if refresh:
+        reset_state()
+        
 
     # col1.markdown("<h2 style='padding-top: 5px;'>Verdict: </h2>", unsafe_allow_html=True)
     # if st.session_state.pred == "fact":

@@ -2,6 +2,7 @@ from duckduckgo_search import DDGS
 import requests
 import json
 import re
+from websearch import google_search, get_logo
 
 def generate_response(url, headers, model, params, retry_count=0, retry_limit=2, timeout=120):
   try:
@@ -11,7 +12,7 @@ def generate_response(url, headers, model, params, retry_count=0, retry_limit=2,
       headers=headers,
       data=json.dumps({"model": model, **params})
     )
-    return response.json()
+    return response.json()['choices'][0]['message']['content']
 
   except requests.Timeout:
     print(f"{retry_count} | Timed out")
@@ -39,9 +40,11 @@ def INFER_PARAMS(claim, premise):
   }
 
 def parse_llama_explanation(text):
+  import re
   try:
-    label, explanation = text.split(' - ')
-    return label, explanation
+    # label, explanation = text.split(' - ')
+    label = re.findall(r'(fact|false) - ', text, re.IGNORECASE)[0].lower()
+    return label, text
     # return label, text                    # DEBUG
   except Exception as e:
     print(f"Error: {e}")
@@ -63,24 +66,74 @@ def web_search_logo(query):
 
     raise ValueError("No image found.")
 
+URL_FILTERS = ['google.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
+               'tsek.ph', 'factrakers.org', 'abs-cbn.com', 'altermidya.net', 'dailyguardian.com.ph',
+               'onenews.ph', 'gmanetwork.com', 'bbc.co.uk']
+
 def web_search_text(query, url_whitelist, max_results, add_logo_url=True):
   with DDGS() as ddgs:
     results = ddgs.text(query, max_results=max_results)
-
+    print(f"INITIAL RESULT FROM DUCKDUCKGO: {results}")
     # Filter results based on the whitelist
-    if url_whitelist:
-      results = [result for result in results if any(whitelisted_url in result['href'] for whitelisted_url in url_whitelist)]
+    # if url_whitelist:
+    #   results = [result for result in results if any(whitelisted_url in result['href'] for whitelisted_url in url_whitelist)]
 
     if add_logo_url:
       for result in results: 
         result['logo_url'] = web_search_logo(parse_domain(result['href']))
 
+    print(f"final RESULT FROM DUCKDUCKGO: {results}")
     # Returns an array of dictionaries to access title, href, body, *(optional) logo_url
     return results
   
-URL_FILTERS = ['google.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph', 'tsek.ph', 'factrakers.org', 'abs-cbn.com', 'altermidya.net', 'dailyguardian.com.ph', 'onenews.ph']
+def web_search_text_v2(claim, url_whitelist=URL_FILTERS):
+    # Obtain search results
+    api_key = 'AIzaSyD--18Qf2pFmGdBV5Z_-7mE7iXwxeqGzck'
+    search_engine_id = 'd7d548aac47524dbd'
+    response = google_search(
+        api_key=api_key,
+        search_engine_id=search_engine_id,
+        query=claim,
+        num=50
+    )
+    search_results = []
+    search_results.extend(response.get('items', []))
 
-def find_premise_via_webrag(claim, url_filters=[], max_results=5):
+    # Filter results according to whitelist URL_FILTERS
+    if url_whitelist:
+        filtered_results = [
+            result for result in search_results
+            if any(whitelisted_url in result['link'] for whitelisted_url in url_whitelist)
+        ]
+
+    # Get logo of each result
+    for item in filtered_results:
+        link = item['displayLink']
+        item['logo_url'] = get_logo(link)
+        # print(f"For {item['link']}, I found this logo: {item['logo_url']}")
+
+    # Rename keys to match app needs
+    key_map = {
+        'title': 'title',
+        'link': 'href',
+        'snippet': 'body',
+        'logo_url': 'logo_url' 
+    }
+
+    filtered_results = [
+        {new_key: item.get(old_key) for old_key, new_key in key_map.items()}
+        for item in search_results
+    ]
+
+    print(filtered_results)
+    return filtered_results[:5]
+
+def find_premise_via_webrag(claim, url_filters=URL_FILTERS, max_results=5):
   search_results = web_search_text(claim, url_filters, max_results, add_logo_url=True)
+  result = search_results[0]
+  return result['href'], search_results
+
+def find_premise_via_webrag_v2(claim, url_filters=URL_FILTERS, max_results=5):
+  search_results = web_search_text_v2(claim)
   result = search_results[0]
   return result['href'], search_results

@@ -1,6 +1,6 @@
 import streamlit as st
-import config
-from backend import parse_llama_explanation#, find_premise_via_webrag
+from config import URL, HEADERS, MODEL
+from backend import parse_llama_explanation, find_premise_via_webrag, find_premise_via_webrag_v2
 from backend import WEB_RAG_PARAMS, INFER_PARAMS, generate_response
 
 # st.set_page_config(layout="wide")
@@ -29,25 +29,25 @@ load_css("styles.css")
 #                  "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"}]
 #     return websearch, "<>", "This is the PREMISE"
 
-def find_premise_via_webrag():
-    websearch = [{"title": "Title 1",
-                 "href": "https://verafiles.org/",
-                 "body": "Body 1",
-                 "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"},
-                 {"title": "Title 2",
-                 "href": "https://verafiles.org/",
-                 "body": "Body 2",
-                 "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"}]
-    return websearch, "https://verafiles.org/"
+# def find_premise_via_webrag():
+#     websearch = [{"title": "Title 1",
+#                  "href": "https://verafiles.org/",
+#                  "body": "Body 1",
+#                  "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"},
+#                  {"title": "Title 2",
+#                  "href": "https://verafiles.org/",
+#                  "body": "Body 2",
+#                  "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"}]
+#     return websearch, "https://verafiles.org/"
 
 def predict(h, p):
     #--------------
-    return "False", "This is the EXPLANATION"
+    # return "False", "This is the EXPLANATION"
     #--------------
-    formatted_input = format_premise_hypothesis(p, h)
-    inference = generate_response(url=URL, headers=HEADERS, model=MODEL, content=WEB_RAG_PARAMS(h, p))
-    inference = generate_response(url=URL, headers=HEADERS, model=MODEL, params=INFER_PARAMS(h, p))
+    inference = generate_response(url=URL, headers=HEADERS, model=MODEL, params=WEB_RAG_PARAMS(h, p))
+    print("INFERENCE:", inference)
     prediction, explanation = parse_llama_explanation(inference)
+    print("PREDICTION:", prediction, explanation)
     return prediction, explanation
 
 #------------------
@@ -67,19 +67,32 @@ if "pred" not in st.session_state:
 if "expl" not in st.session_state:
     st.session_state.expl = ""
 
+if "websearch" not in st.session_state:
+    st.session_state.websearch = []
+
 
 #------------------
 
 def display_pred():
     st.session_state.submitted = True
     # prem_link, websearch = find_premise_via_webrag(st.session_state.claim, url_filters=[])
-    websearch, prem_link = find_premise_via_webrag()            #placeholder, to remove
+    prem_link, websearch = find_premise_via_webrag_v2(st.session_state.claim)   #placeholder, to remove
+    # websearch = [{"title": "Title 1",
+    #              "href": "https://verafiles.org/",
+    #              "body": "Body 1",
+    #              "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"},
+    #              {"title": "Title 2",
+    #              "href": "https://verafiles.org/",
+    #              "body": "Body 2",
+    #              "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"}]
+    # prem_link = 'https://www.abs-cbn.com/2024/1/14/mark-leviste-dispels-rumors-claiming-kris-aquino-is-dead-923'
     st.session_state.websearch = websearch
     st.session_state.premise = prem_link
 
-    pred, expl = predict(st.session_state.claim, prem_link)
-    st.session_state.pred = pred
-    st.session_state.expl = expl
+    if prem_link != '':
+        pred, expl = predict(st.session_state.claim, prem_link)
+        st.session_state.pred = pred
+        st.session_state.expl = expl
 
 
 def reset_state():
@@ -159,33 +172,29 @@ else:
     division_placeholder.markdown('---')
 
     with websearch_placeholder.container():
-        st.markdown(f"<p style='margin: 0px;'>Websearch results:</p>", unsafe_allow_html=True)
-        for result in st.session_state.websearch:
-            st.markdown(
-                f"""
-                <div class="websearch-result">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="{result['logo_url']}" width="30px">
-                        <strong><a href="{result['href']}" target="_blank">{result['title']}</a></strong>
+        if st.session_state.websearch:
+            st.markdown(f"<p style='margin: 0px;'>Websearch results:</p>", unsafe_allow_html=True)
+            for result in st.session_state.websearch:
+                st.markdown(
+                    f"""
+                    <div class="websearch-result">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="{result['logo_url']}" width="30px">
+                            <strong><a href="{result['href']}" target="_blank">{result['title']}</a></strong>
+                        </div>
+                        <p>{result['body']}</p>
                     </div>
-                    <p>{result['body']}</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(f"<p style='margin: 0px;'>No suitable web searches found.</p>", unsafe_allow_html=True)
             
     premise_placeholder.markdown(f"Premise taken from: {st.session_state.premise}")
 
     st.markdown('---')
 
-    
+
     refresh = st.button('Try another claim!')
     if refresh:
         reset_state()
-        
-
-    # col1.markdown("<h2 style='padding-top: 5px;'>Verdict: </h2>", unsafe_allow_html=True)
-    # if st.session_state.pred == "fact":
-    #     col2.markdown(f"<h2 style='padding-top: 5px; color:green'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)
-    # else:
-    #     col2.markdown(f"<h2 style='padding-top: 5px; color:red'> <em>{st.session_state.pred.capitalize()}</em> </h2>", unsafe_allow_html=True)

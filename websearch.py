@@ -30,7 +30,7 @@ def get_logo(url):
     
     # Implement if favicon is too small, use clearbit
 
-    if favicon == None | favicon == '':
+    if favicon == None or favicon == '':
         return 'https://www.shutterstock.com/image-vector/no-image-available-picture-coming-600nw-2057829641.jpg'
     return favicon
 

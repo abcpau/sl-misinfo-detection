@@ -88,13 +88,13 @@ def web_search_text(query, url_whitelist, max_results, add_logo_url=True):
   
 def web_search_text_v2(claim, url_whitelist=URL_FILTERS):
     # Obtain search results
-    api_key = 'AIzaSyD--18Qf2pFmGdBV5Z_-7mE7iXwxeqGzck'
-    search_engine_id = 'd7d548aac47524dbd'
+    api_key = 'AIzaSyB9psTN9G6Jp_e0Amy1jByUkXOQrlRI7K0' #'AIzaSyD--18Qf2pFmGdBV5Z_-7mE7iXwxeqGzck' # <- PAU Api key
+    search_engine_id = '73ce954d1197b4804' # 'd7d548aac47524dbd' # Pau search engine id
     response = google_search(
         api_key=api_key,
         search_engine_id=search_engine_id,
         query=claim,
-        num=50
+        num=10
     )
     search_results = []
     search_results.extend(response.get('items', []))

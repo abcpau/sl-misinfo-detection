@@ -66,9 +66,9 @@ def web_search_logo(query):
 
     raise ValueError("No image found.")
 
-URL_FILTERS = ['google.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
+URL_FILTERS = ['wikipedia.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
                'tsek.ph', 'factrakers.org', 'abs-cbn.com', 'altermidya.net', 'dailyguardian.com.ph',
-               'onenews.ph', 'gmanetwork.com', 'bbc.co.uk']
+               'onenews.ph', 'gmanetwork.com', 'bbc.co.uk', 'cnn.co.uk', 'inquirer.net', 'news.abs-cbn.com', 'www.theguardian.com']
 
 def web_search_text(query, url_whitelist, max_results, add_logo_url=True):
   with DDGS() as ddgs:
@@ -100,6 +100,7 @@ def web_search_text_v2(claim, url_whitelist=URL_FILTERS):
     search_results.extend(response.get('items', []))
 
     # Filter results according to whitelist URL_FILTERS
+    filtered_results = search_results
     if url_whitelist:
         filtered_results = [
             result for result in search_results
@@ -122,10 +123,15 @@ def web_search_text_v2(claim, url_whitelist=URL_FILTERS):
 
     filtered_results = [
         {new_key: item.get(old_key) for old_key, new_key in key_map.items()}
-        for item in search_results
+        for item in filtered_results
     ]
 
-    print(filtered_results)
+    # Remove '<' and '>' from 'body' and 'title' in filtered_results
+    for item in filtered_results:
+        if 'body' in item and item['body']:
+            item['body'] = item['body'].replace('<', '').replace('>', '')
+        if 'title' in item and item['title']:
+            item['title'] = item['title'].replace('<', '').replace('>', '')
     return filtered_results[:5]
 
 def find_premise_via_webrag(claim, url_filters=URL_FILTERS, max_results=5):

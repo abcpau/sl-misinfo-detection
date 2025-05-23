@@ -141,5 +141,10 @@ def find_premise_via_webrag(claim, url_filters=URL_FILTERS, max_results=5):
 
 def find_premise_via_webrag_v2(claim, url_filters=URL_FILTERS, max_results=5):
   search_results = web_search_text_v2(claim)
+  
+  if not search_results:
+    print("No filtered search results found.")
+    return None, []
+  
   result = search_results[0]
   return result['href'], search_results

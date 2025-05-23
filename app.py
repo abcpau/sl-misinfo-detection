@@ -71,26 +71,43 @@ if "expl" not in st.session_state:
 if "websearch" not in st.session_state:
     st.session_state.websearch = []
 
-# Add initialization for last_date_time_used
-if "last_date_time_used" not in st.session_state:
-    st.session_state.last_date_time_used = ""
-
-
 #------------------
+
+def overlay_html(text):
+    return f"""
+    <style>
+    .overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }}
+    .overlay h1 {{
+        color: black;
+        font-size: 2em;
+        text-align: center;
+    }}
+    </style>
+    <div class="overlay">
+        <h1>[{time.strftime('%Y-%m-%d %H:%M')}] {text}</h1>
+    </div>
+    """
 
 def display_pred():
     st.session_state.submitted = True
     
-    # Update last_date_time_used to current date and time
-    st.session_state.last_date_time_used = time.strftime('%Y-%m-%d %H:%M:%S')
     status_placeholder = st.empty()
-    current_date_time = st.session_state.last_date_time_used
-    current_date_time = time.strftime('%Y-%m-%d %H:%M')
     if not is_model_running(OLLAMA_MODEL):
-        print(f"[{current_date_time}] Ollama model is not running. Initializing model.")
-        status_placeholder.markdown(f'# [{current_date_time}] Initializing model...', unsafe_allow_html=True)
+        print(f"[{time.strftime('%Y-%m-%d %H:%M')}] Ollama model is not running. Initializing model.")
+        status_placeholder.markdown(overlay_html('Initializing model...'), unsafe_allow_html=True)
         time.sleep(10)
-    status_placeholder.markdown(f'# [{current_date_time}] Inferencing...', unsafe_allow_html=True)
+    status_placeholder.markdown(overlay_html('Inferencing...'), unsafe_allow_html=True)
     
     prem_link, websearch = find_premise_via_webrag(st.session_state.claim)
     st.session_state.websearch = websearch

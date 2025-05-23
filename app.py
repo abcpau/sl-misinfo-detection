@@ -110,9 +110,9 @@ with header:
                 <div class="header">
                     <div class="title-row">
                         <img src="{logo_url}" width="100px">
-                        <h1 class="title" style="word-break: keep-all">POMI</h1>
+                        <h1 class="title" style="word-break: keep-all">PATUNAI</h1>
                     </div>
-                    <p class="subtitle"> A Filipino Fake News Detector </p>
+                    <p class="subtitle"> A Filipino Misinformation Detector </p>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -198,3 +198,17 @@ else:
     refresh = st.button('Try another claim!')
     if refresh:
         reset_state()
+    
+# About this Project and Contact Information section (always visible)
+with st.container():
+    st.info(
+        """
+        ### About PATUNAI
+        Pattern Analysis Tool for Unverified News using AI (PATUNAI) is a research project aimed at detecting misinformation in Filipino news and social media. It leverages advanced AI and web search to help users verify claims quickly and accurately. This tool is for educational and research purposes only.
+        
+        **Contact Information**  
+        Project Lead: Paul Regonia, D.Sc.  
+        Researchers and Developers: [Abcede, Pauline](mailto:mgabcede1@up.edu.ph) and [Salazar, Led](mailto:lrsalazar@up.edu.ph)
+        """,
+        icon="🔍"
+    )

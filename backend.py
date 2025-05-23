@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 from websearch import google_search, get_logo
 
 def generate_response(url, headers, model, params, retry_count=0, retry_limit=2, timeout=120):
@@ -13,7 +14,7 @@ def generate_response(url, headers, model, params, retry_count=0, retry_limit=2,
     return response.json()['choices'][0]['message']['content']
 
   except requests.Timeout:
-    print(f"{retry_count} | Timed out")
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] {retry_count} | Timed out")
     if retry_count <= retry_limit: return generate_response(url, headers, model, params, retry_count + 1)
 
 def WEB_RAG_PARAMS(claim, link):
@@ -45,7 +46,7 @@ def parse_llama_explanation(text):
     return label, text
     # return label, text                    # DEBUG
   except Exception as e:
-    print(f"Error: {e}")
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] Error: {e}")
     return 'error', text
 
 URL_FILTERS = ['wikipedia.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
@@ -104,8 +105,17 @@ def find_premise_via_webrag(claim):
   search_results = web_search_text(claim)
   
   if not search_results:
-    print("No filtered search results found.")
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] No filtered search results found.")
     return None, []
   
   result = search_results[0]
   return result['href'], search_results
+
+def is_model_running(model_name, ip='localhost', port=11434):
+    response = requests.get(f"http://{ip}:{port}/api/ps")
+    if response.status_code == 200:
+        running_models = response.json()
+        return any(model['name'] == model_name for model in running_models['models'])
+    else:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M')}] Address {ip}:{port} | Failed to retrieve running ollama models.")
+        return False

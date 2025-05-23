@@ -1,7 +1,7 @@
 import streamlit as st
 import time
-from config import URL, HEADERS, MODEL
-from backend import parse_llama_explanation, find_premise_via_webrag
+from config import URL, HEADERS, OPEN_WEBUI_MODEL, OLLAMA_MODEL
+from backend import parse_llama_explanation, find_premise_via_webrag, is_model_running
 from backend import WEB_RAG_PARAMS, INFER_PARAMS, generate_response
 
 # st.set_page_config(layout="wide")
@@ -45,10 +45,10 @@ def predict(h, p):
     #--------------
     # return "False", "This is the EXPLANATION"
     #--------------
-    inference = generate_response(url=URL, headers=HEADERS, model=MODEL, params=WEB_RAG_PARAMS(h, p))
-    print("INFERENCE:", inference)
+    inference = generate_response(url=URL, headers=HEADERS, model=OPEN_WEBUI_MODEL, params=WEB_RAG_PARAMS(h, p))
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] INFERENCE:", inference)
     prediction, explanation = parse_llama_explanation(inference)
-    print("PREDICTION:", prediction, explanation)
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] PREDICTION:", prediction, explanation)
     return prediction, explanation
 
 #------------------
@@ -85,10 +85,12 @@ def display_pred():
     st.session_state.last_date_time_used = time.strftime('%Y-%m-%d %H:%M:%S')
     status_placeholder = st.empty()
     current_date_time = st.session_state.last_date_time_used
-    status_placeholder.markdown(f'# {current_date_time} | Initializing model...', unsafe_allow_html=True)
-    time.sleep(5)
-    current_date_time = time.strftime('%Y-%m-%d %H:%M:%S')
-    status_placeholder.markdown(f'# {current_date_time} | Inferencing...', unsafe_allow_html=True)
+    current_date_time = time.strftime('%Y-%m-%d %H:%M')
+    if not is_model_running(OLLAMA_MODEL):
+        print(f"[{current_date_time}] Ollama model is not running. Initializing model.")
+        status_placeholder.markdown(f'# [{current_date_time}] Initializing model...', unsafe_allow_html=True)
+        time.sleep(10)
+    status_placeholder.markdown(f'# [{current_date_time}] Inferencing...', unsafe_allow_html=True)
     
     prem_link, websearch = find_premise_via_webrag(st.session_state.claim)
     st.session_state.websearch = websearch

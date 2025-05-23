@@ -1,7 +1,5 @@
-from duckduckgo_search import DDGS
 import requests
 import json
-import re
 from websearch import google_search, get_logo
 
 def generate_response(url, headers, model, params, retry_count=0, retry_limit=2, timeout=120):
@@ -50,43 +48,11 @@ def parse_llama_explanation(text):
     print(f"Error: {e}")
     return 'error', text
 
-def parse_domain(link):
-  think_pattern = r"https://(?:www\.)?([^/]+)"
-  re_match = re.search(think_pattern, link, re.DOTALL)
-  web_link = re_match.group(1).strip()
-  return web_link
-
-def web_search_logo(query):
-  with DDGS() as ddgs:
-    results = ddgs.images(f"{query} logo", max_results=1)  # Get the first image
-
-    if results:
-      # Returns logo URL
-      return results[0]['image']
-
-    raise ValueError("No image found.")
-
 URL_FILTERS = ['wikipedia.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
                'tsek.ph', 'factrakers.org', 'abs-cbn.com', 'altermidya.net', 'dailyguardian.com.ph',
                'onenews.ph', 'gmanetwork.com', 'bbc.co.uk', 'cnn.co.uk', 'inquirer.net', 'news.abs-cbn.com', 'www.theguardian.com']
-
-def web_search_text(query, url_whitelist, max_results, add_logo_url=True):
-  with DDGS() as ddgs:
-    results = ddgs.text(query, max_results=max_results)
-    print(f"INITIAL RESULT FROM DUCKDUCKGO: {results}")
-    # Filter results based on the whitelist
-    # if url_whitelist:
-    #   results = [result for result in results if any(whitelisted_url in result['href'] for whitelisted_url in url_whitelist)]
-
-    if add_logo_url:
-      for result in results: 
-        result['logo_url'] = web_search_logo(parse_domain(result['href']))
-
-    print(f"final RESULT FROM DUCKDUCKGO: {results}")
-    # Returns an array of dictionaries to access title, href, body, *(optional) logo_url
-    return results
   
-def web_search_text_v2(claim, url_whitelist=URL_FILTERS):
+def web_search_text(claim, url_whitelist=URL_FILTERS):
     # Obtain search results
     api_key = 'AIzaSyB9psTN9G6Jp_e0Amy1jByUkXOQrlRI7K0' #'AIzaSyD--18Qf2pFmGdBV5Z_-7mE7iXwxeqGzck' # <- PAU Api key
     search_engine_id = '73ce954d1197b4804' # 'd7d548aac47524dbd' # Pau search engine id
@@ -134,13 +100,8 @@ def web_search_text_v2(claim, url_whitelist=URL_FILTERS):
             item['title'] = item['title'].replace('<', '').replace('>', '')
     return filtered_results[:5]
 
-def find_premise_via_webrag(claim, url_filters=URL_FILTERS, max_results=5):
-  search_results = web_search_text(claim, url_filters, max_results, add_logo_url=True)
-  result = search_results[0]
-  return result['href'], search_results
-
-def find_premise_via_webrag_v2(claim, url_filters=URL_FILTERS, max_results=5):
-  search_results = web_search_text_v2(claim)
+def find_premise_via_webrag(claim):
+  search_results = web_search_text(claim)
   
   if not search_results:
     print("No filtered search results found.")

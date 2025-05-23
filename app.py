@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 from config import URL, HEADERS, MODEL
-from backend import parse_llama_explanation, find_premise_via_webrag, find_premise_via_webrag_v2
+from backend import parse_llama_explanation, find_premise_via_webrag
 from backend import WEB_RAG_PARAMS, INFER_PARAMS, generate_response
 
 # st.set_page_config(layout="wide")
@@ -90,7 +90,7 @@ def display_pred():
     current_date_time = time.strftime('%Y-%m-%d %H:%M:%S')
     status_placeholder.markdown(f'# {current_date_time} | Inferencing...', unsafe_allow_html=True)
     
-    prem_link, websearch = find_premise_via_webrag_v2(st.session_state.claim)
+    prem_link, websearch = find_premise_via_webrag(st.session_state.claim)
     st.session_state.websearch = websearch
     st.session_state.premise = prem_link
 

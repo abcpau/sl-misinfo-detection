@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from config import URL, HEADERS, MODEL
 from backend import parse_llama_explanation, find_premise_via_webrag, find_premise_via_webrag_v2
 from backend import WEB_RAG_PARAMS, INFER_PARAMS, generate_response
@@ -70,22 +71,26 @@ if "expl" not in st.session_state:
 if "websearch" not in st.session_state:
     st.session_state.websearch = []
 
+# Add initialization for last_date_time_used
+if "last_date_time_used" not in st.session_state:
+    st.session_state.last_date_time_used = ""
+
 
 #------------------
 
 def display_pred():
     st.session_state.submitted = True
-    # prem_link, websearch = find_premise_via_webrag(st.session_state.claim, url_filters=[])
-    prem_link, websearch = find_premise_via_webrag_v2(st.session_state.claim)   #placeholder, to remove
-    # websearch = [{"title": "Title 1",
-    #              "href": "https://verafiles.org/",
-    #              "body": "Body 1",
-    #              "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"},
-    #              {"title": "Title 2",
-    #              "href": "https://verafiles.org/",
-    #              "body": "Body 2",
-    #              "logo_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/VeraFiles_logo.svg"}]
-    # prem_link = 'https://www.abs-cbn.com/2024/1/14/mark-leviste-dispels-rumors-claiming-kris-aquino-is-dead-923'
+    
+    # Update last_date_time_used to current date and time
+    st.session_state.last_date_time_used = time.strftime('%Y-%m-%d %H:%M:%S')
+    status_placeholder = st.empty()
+    current_date_time = st.session_state.last_date_time_used
+    status_placeholder.markdown(f'# {current_date_time} | Initializing model...', unsafe_allow_html=True)
+    time.sleep(5)
+    current_date_time = time.strftime('%Y-%m-%d %H:%M:%S')
+    status_placeholder.markdown(f'# {current_date_time} | Inferencing...', unsafe_allow_html=True)
+    
+    prem_link, websearch = find_premise_via_webrag_v2(st.session_state.claim)
     st.session_state.websearch = websearch
     st.session_state.premise = prem_link
 
@@ -93,6 +98,8 @@ def display_pred():
         pred, expl = predict(st.session_state.claim, prem_link)
         st.session_state.pred = pred
         st.session_state.expl = expl
+    
+    status_placeholder.empty()
 
 
 def reset_state():

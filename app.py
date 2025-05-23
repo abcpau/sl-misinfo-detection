@@ -46,9 +46,10 @@ def predict(h, p):
     # return "False", "This is the EXPLANATION"
     #--------------
     inference = generate_response(url=URL, headers=HEADERS, model=OPEN_WEBUI_MODEL, params=WEB_RAG_PARAMS(h, p))
-    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] INFERENCE:", inference)
+    print(f"\n[{time.strftime('%Y-%m-%d %H:%M')}] CLAIM: {h}")
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] PREMISE: {p}")
+    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] INFERENCE: {inference}\n")
     prediction, explanation = parse_llama_explanation(inference)
-    print(f"[{time.strftime('%Y-%m-%d %H:%M')}] PREDICTION:", prediction, explanation)
     return prediction, explanation
 
 #------------------

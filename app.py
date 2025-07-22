@@ -231,11 +231,11 @@ with st.container():
     st.info(
         """
         ### About PATUNAI
-        Pattern Analysis Tool for Unverified News using AI (PATUNAI) is a research project aimed at detecting misinformation in Filipino news and social media. It leverages advanced AI and web search to help users verify claims quickly and accurately. This tool is for educational and research purposes only.
+        Premise-based Analysis Tool for Unverified News using AI (PATUNAI) is a research project aimed at detecting misinformation in Filipino news and social media. It leverages advanced AI and web search to help users verify claims quickly and accurately. This tool is for educational and research purposes only.
         
-        **Contact Information**  
-        Project Lead: Paul Regonia, D.Sc.  
-        Researchers and Developers: [Abcede, Pauline](mailto:mgabcede1@up.edu.ph) and [Salazar, Led](mailto:lrsalazar@up.edu.ph)
+        **Contact Information**\\
+        Project Lead: Dr. Paul Regonia and Dr. Roselyn Gabud\\
+        Researchers and Developers: [Abcede, Pauline](mailto:mgabcede1@up.edu.ph), [Salazar, Led](mailto:lrsalazar@up.edu.ph), and Kristine Nunez
         """,
         icon="🔍"
     )

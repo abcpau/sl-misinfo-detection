@@ -49,9 +49,10 @@ def parse_llama_explanation(text):
     print(f"[{time.strftime('%Y-%m-%d %H:%M')}] Error: {e}")
     return 'error', text
 
-URL_FILTERS = ['wikipedia.com', 'verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
+URL_FILTERS = ['verafiles.org', 'rappler.com', 'thebaguiochronicle.com', 'news.tv5.com.ph',
                'tsek.ph', 'factrakers.org', 'abs-cbn.com', 'altermidya.net', 'dailyguardian.com.ph',
-               'onenews.ph', 'gmanetwork.com', 'bbc.co.uk', 'cnn.co.uk', 'inquirer.net', 'news.abs-cbn.com', 'www.theguardian.com']
+               'onenews.ph', 'gmanetwork.com', 'bbc.co.uk', 'cnn.co.uk', 'inquirer.net', 'news.abs-cbn.com', 
+               'theguardian.com', 'wikipedia.com']
   
 def web_search_text(claim, url_whitelist=URL_FILTERS):
     # Obtain search results
@@ -61,7 +62,8 @@ def web_search_text(claim, url_whitelist=URL_FILTERS):
         api_key=api_key,
         search_engine_id=search_engine_id,
         query=claim,
-        num=10
+        num=10,
+        gl='ph',
     )
     search_results = []
     search_results.extend(response.get('items', []))

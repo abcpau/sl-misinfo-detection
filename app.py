@@ -183,9 +183,10 @@ else:
     claim_placeholder.markdown(f"<div class='text-box'>Claim: {st.session_state.claim}</div>", unsafe_allow_html=True)
 
     verdict_color = "green" if st.session_state.pred == "fact" else "red"
+    verdict_class = "verdict-box-fact" if st.session_state.pred == "fact" else "verdict-box-false"
     pred_placeholder.markdown(
         f"""
-        <div class="verdict-box-false">
+        <div class="{verdict_class}">
         <h2 style='padding: 5px;'>Verdict: &nbsp;
             <span style='color:{verdict_color};'><em>{st.session_state.pred.capitalize()}</em></span>
         </h2>
